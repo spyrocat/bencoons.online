@@ -215,11 +215,11 @@ footer { margin-top: 72px; color: var(--muted); font-size: 13px; border-top: 1px
       <li>Every AI agent gets the same page a person does. In an audit of 19 AI crawlers, assistants and scripts from OpenAI, Anthropic, Perplexity, Google, Bing, Meta and Amazon, every one got identical HTTP 200s, with no bot walls.</li>
       <li>Server-rendered pages carry machine-readable offer data, so an agent reads the bank, product, offer and FAQs without parsing prose.</li>
       <li>An offer page scores 100 on Google Lighthouse's "Agentic Browsing" audit.</li>
+      <li><code>/llms.txt</code> maps the site for language models. It's generated from live data on every build, and a test fails the build if it lists an expired offer.</li>
       <li>Every deploy pings IndexNow, so AI search engines see changed pages the same morning.</li>
       <li>When an AI assistant fetches an apply link, it counts as a bot click, so agent traffic never inflates the human numbers.</li>
     </ul></div>
     <div class="card"><h3>Next</h3><ul>
-      <li><code>/llms.txt</code>: a map of the site written for language models</li>
       <li>A clean markdown version of every page for agents that ask for one</li>
       <li>An application link in each offer's machine-readable data, so an agent can act on it, not just quote it</li>
       <li>Letting well-behaved agents follow apply links that robots.txt now blocks</li>
