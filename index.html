@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>An AI CEO runs my business every morning · Ben Coons</title>
+<style>
+.viz-root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface-1: #fcfcfb; --surface-2: #f0efec;
+  --text-primary: #0b0b0b; --text-secondary: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --ring: rgba(11,11,11,0.10);
+  --pub: #2a78d6; --intel: #eb6834; --neutral: #898781;
+  --good: #0ca30c; --warning: #fab219; --glow: rgba(42,120,214,0.18);
+}
+:root[data-theme="dark"] .viz-root {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface-1: #1a1a19; --surface-2: #232322;
+  --text-primary: #f0efec; --text-secondary: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10);
+  --pub: #3987e5; --intel: #d95926; --neutral: #6f6e69;
+  --glow: rgba(57,135,229,0.22);
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+.viz-root {
+  background: var(--page); color: var(--text-primary);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.5; min-height: 100vh;
+}
+.wrap { max-width: 1040px; margin: 0 auto; padding: 56px 24px 80px; }
+.eyebrow { color: var(--muted); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
+h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.1; margin: 10px 0 14px; letter-spacing: -0.02em; }
+h2 { font-size: 22px; margin: 0 0 4px; letter-spacing: -0.01em; }
+.lede { color: var(--text-secondary); font-size: 18px; max-width: 720px; margin: 0; }
+.sub { color: var(--text-secondary); margin: 0 0 20px; max-width: 760px; }
+section { margin-top: 64px; }
+.card { background: var(--surface-1); border: 1px solid var(--ring); border-radius: 14px; padding: 24px; }
+.theme-btn { float: right; background: none; border: 1px solid var(--ring); color: var(--text-secondary);
+  border-radius: 8px; padding: 6px 10px; font: inherit; font-size: 13px; cursor: pointer; }
+
+/* stat tiles */
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-top: 36px; }
+.tile { background: var(--surface-1); border: 1px solid var(--ring); border-radius: 12px; padding: 16px 18px; }
+.tile .v { font-size: 34px; font-weight: 650; letter-spacing: -0.02em; }
+.tile .k { color: var(--text-secondary); font-size: 14px; }
+
+/* flow diagram */
+.flow { display: grid; gap: 14px; }
+.row { display: grid; gap: 14px; }
+.node { position: relative; background: var(--surface-2); border: 1px solid var(--ring); border-radius: 10px;
+  padding: 12px 14px; cursor: pointer; transition: transform .15s, box-shadow .15s, border-color .15s; text-align: left;
+  font: inherit; color: inherit; width: 100%; }
+.node:hover, .node:focus-visible, .node.active { transform: translateY(-2px); box-shadow: 0 0 0 3px var(--glow); outline: none; }
+.node .t { font-weight: 600; }
+.node .d { color: var(--text-secondary); font-size: 13px; }
+.node .who { color: var(--muted); font-size: 12px; margin-top: 4px; }
+.node.ceo { border-color: var(--text-secondary); }
+.node.pub { border-left: 4px solid var(--pub); }
+.node.intel { border-left: 4px solid var(--intel); }
+.node.dim { opacity: .62; }
+.lanes { display: grid; grid-template-columns: 1.6fr 1fr; gap: 18px; }
+.lane { border: 1px dashed var(--axis); border-radius: 12px; padding: 14px; display: grid; gap: 10px; align-content: start; }
+.lane h3 { margin: 0; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.lane h3 small { color: var(--muted); font-weight: 400; }
+.swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.arrow { height: 22px; position: relative; }
+.arrow::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: var(--axis); }
+.arrow::after { content: ""; position: absolute; left: calc(50% - 3px); top: 0; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--pub); animation: drop 1.8s linear infinite; }
+@keyframes drop { from { top: -4px; opacity: 0 } 20% { opacity: 1 } to { top: 18px; opacity: 0 } }
+.chain { display: grid; gap: 6px; }
+.chain .link { height: 10px; width: 2px; background: var(--axis); margin-left: 18px; }
+.split { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.detail { margin-top: 18px; min-height: 92px; border-top: 1px solid var(--grid); padding-top: 16px; }
+.detail .t { font-weight: 650; font-size: 17px; }
+.detail p { margin: 4px 0 0; color: var(--text-secondary); max-width: 820px; }
+.hint { color: var(--muted); font-size: 13px; }
+@media (max-width: 720px) { .lanes, .split { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .arrow::after { animation: none; display: none; } }
+
+/* charts */
+.legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; color: var(--text-secondary); margin-bottom: 10px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+svg text { font-family: inherit; }
+.axis-label { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.lbl { fill: var(--text-primary); font-size: 12px; }
+.lbl2 { fill: var(--text-secondary); font-size: 12px; }
+.mark { transition: opacity .12s; }
+.mark:hover, .mark:focus { opacity: .8; outline: none; }
+#tip { position: fixed; pointer-events: none; background: var(--surface-1); border: 1px solid var(--ring);
+  border-radius: 8px; padding: 8px 10px; font-size: 13px; box-shadow: 0 6px 24px rgba(0,0,0,.25);
+  opacity: 0; transition: opacity .1s; z-index: 10; max-width: 280px; }
+#tip b { display: block; font-size: 15px; }
+#tip .s { color: var(--text-secondary); }
+details { margin-top: 14px; color: var(--text-secondary); font-size: 14px; }
+summary { cursor: pointer; }
+table { border-collapse: collapse; margin-top: 8px; font-size: 13px; font-variant-numeric: tabular-nums; }
+td, th { padding: 3px 12px 3px 0; text-align: left; border-bottom: 1px solid var(--grid); }
+
+/* authority */
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 720px) { .two { grid-template-columns: 1fr; } }
+.two ul { margin: 8px 0 0; padding-left: 18px; color: var(--text-secondary); }
+.two li { margin: 4px 0; }
+.two h3 { margin: 0; font-size: 16px; }
+.guards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+.guard .t { font-weight: 600; }
+.guard p { margin: 4px 0 0; color: var(--text-secondary); font-size: 14px; }
+footer { margin-top: 72px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--grid); padding-top: 18px; }
+</style>
+</head>
+<body>
+<div class="viz-root">
+<div class="wrap">
+
+<button class="theme-btn" id="theme" type="button">Light mode</button>
+<div class="eyebrow">Ben Coons · The Bonus Stack</div>
+<h1>An AI CEO runs my business<br>every morning at 3:03.</h1>
+<p class="lede">The Bonus Stack is a bank-bonus site. Every morning a scheduled AI CEO sends out about ten AI agents to find new offers, check every live offer, write and publish pages and read the numbers. Then it ships the site and emails me a report. I steer it with GitHub issues. Everything below comes from the run log it keeps.</p>
+
+<div class="tiles" id="tiles"></div>
+
+<section>
+  <h2>How a morning works</h2>
+  <p class="sub">Click any box to see what it does. Blue boxes can publish and change the site. Orange boxes only read data.</p>
+  <div class="card">
+    <div class="flow">
+      <div class="row split">
+        <button class="node" data-k="timer"><div class="t">03:03 · Timer fires</div><div class="d">systemd on a home server</div></button>
+        <button class="node" data-k="guard"><div class="t">Guard admits the run</div><div class="d">lease, watchdog, memory cap</div></button>
+        <button class="node" data-k="intake"><div class="t">Intake</div><div class="d">inbox, issues, my answers, health sweep</div></button>
+      </div>
+      <div class="arrow"></div>
+      <button class="node ceo" data-k="ceo"><div class="t">CEO agent</div><div class="d">Dispatches every loop and checks each result. It does no loop work itself.</div><div class="who">Claude Opus 5.5</div></button>
+      <div class="arrow"></div>
+      <button class="node" data-k="email"><div class="t">Email loop · runs alone, first</div><div class="d">triages the business inbox; its receipts feed the finance loop</div></button>
+      <div class="arrow"></div>
+      <div class="lanes">
+        <div class="lane">
+          <h3><span class="swatch" style="background:var(--pub)"></span>Publishing chain <small>owns git and the browser, one loop at a time</small></h3>
+          <div class="chain">
+            <button class="node pub" data-k="content"><div class="t">Content</div><div class="d">analytics, page accuracy, SEO fixes</div></button><div class="link"></div>
+            <button class="node pub" data-k="dp"><div class="t">Data points</div><div class="d">scrapes and judges reader reports</div></button><div class="link"></div>
+            <button class="node pub" data-k="deep"><div class="t">Deep discovery</div><div class="d">hunts banks nobody covers yet</div></button><div class="link"></div>
+            <button class="node pub" data-k="offer"><div class="t">Offer accuracy</div><div class="d">re-verifies live offers on bank pages</div></button><div class="link"></div>
+            <button class="node pub" data-k="social"><div class="t">Social</div><div class="d">stages posts for approved offers</div></button><div class="link"></div>
+            <button class="node pub" data-k="ship"><div class="t">Ship · CEO</div><div class="d">one push, verify deploy and CI, ping search engines</div></button><div class="link"></div>
+            <button class="node pub dim" data-k="weekly"><div class="t">Weekly add-ons</div><div class="d">Mon site integrity · Wed growth · Fri subscriber digest</div></button>
+          </div>
+        </div>
+        <div class="lane">
+          <h3><span class="swatch" style="background:var(--intel)"></span>Intel chain <small>read-only, runs in parallel</small></h3>
+          <div class="chain">
+            <button class="node intel" data-k="finance"><div class="t">Finance</div><div class="d">books receipts; runs only when due</div></button><div class="link"></div>
+            <button class="node intel" data-k="conversion"><div class="t">Conversion</div><div class="d">which offers readers click</div></button><div class="link"></div>
+            <button class="node intel" data-k="tracker"><div class="t">Tracker</div><div class="d">how people use the bonus tracker</div></button>
+          </div>
+        </div>
+      </div>
+      <div class="arrow"></div>
+      <div class="row split">
+        <button class="node" data-k="monthly"><div class="t">Monthlies</div><div class="d">competitors, ops audit, brand review</div></button>
+        <button class="node ceo" data-k="synth"><div class="t">CEO synthesis</div><div class="d">decides, files issues, starts build work</div></button>
+        <button class="node" data-k="close"><div class="t">Close gate → report</div><div class="d">no loop due today can go missing</div></button>
+      </div>
+    </div>
+    <div class="detail" id="detail" aria-live="polite"><div class="hint">Click a box ↑</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>This morning, minute by minute</h2>
+  <p class="sub">Friday, Oct 23, 2026. The full run took 101 minutes, from 03:03 to 04:44, with no human involved. Finance had nothing due, so its gate skipped it.</p>
+  <div class="card">
+    <div class="legend"><span><span class="swatch" style="background:var(--pub)"></span>Publishing chain</span><span><span class="swatch" style="background:var(--intel)"></span>Intel chain</span><span><span class="swatch" style="background:var(--neutral)"></span>CEO and email</span></div>
+    <svg id="gantt" width="100%" role="img" aria-label="Timeline of this morning's run"></svg>
+    <details><summary>Table view</summary><table id="ganttTable"></table></details>
+  </div>
+</section>
+
+<section>
+  <h2>Every morning since July 22</h2>
+  <p class="sub" id="histSub"></p>
+  <div class="card">
+    <div class="legend"><span><span class="swatch" style="background:var(--good)"></span>✓ Every loop finished clean</span><span><span class="swatch" style="background:var(--warning)"></span>◐ Partial: a loop failed, was recorded and the rest carried on</span></div>
+    <svg id="hist" width="100%" role="img" aria-label="Minutes per daily run"></svg>
+    <details><summary>Table view</summary><table id="histTable"></table></details>
+  </div>
+</section>
+
+<section>
+  <h2>Built for agents to read</h2>
+  <p class="sub">More and more, people will find, compare and buy things through AI agents instead of a browser. I build the site for those agents as much as for people, and they're already reading it.</p>
+  <div class="card">
+    <p class="sub" id="aiSub" style="margin-bottom:12px"></p>
+    <svg id="ai" width="100%" role="img" aria-label="Weekly Bing AI citations"></svg>
+    <details><summary>Table view</summary><table id="aiTable"></table></details>
+  </div>
+  <div class="two" style="margin-top:14px">
+    <div class="card"><h3>In place today</h3><ul>
+      <li>Every AI agent gets the same page a person does. In an audit of 19 AI crawlers, assistants and scripts from OpenAI, Anthropic, Perplexity, Google, Bing, Meta and Amazon, every one got identical HTTP 200s, with no bot walls.</li>
+      <li>Server-rendered pages carry machine-readable offer data, so an agent reads the bank, product, offer and FAQs without parsing prose.</li>
+      <li>An offer page scores 100 on Google Lighthouse's "Agentic Browsing" audit.</li>
+      <li>Every deploy pings IndexNow, so AI search engines see changed pages the same morning.</li>
+      <li>When an AI assistant fetches an apply link, it counts as a bot click, so agent traffic never inflates the human numbers.</li>
+    </ul></div>
+    <div class="card"><h3>Next</h3><ul>
+      <li><code>/llms.txt</code>: a map of the site written for language models</li>
+      <li>A clean markdown version of every page for agents that ask for one</li>
+      <li>An application link in each offer's machine-readable data, so an agent can act on it, not just quote it</li>
+      <li>Letting well-behaved agents follow apply links that robots.txt now blocks</li>
+    </ul></div>
+  </div>
+</section>
+
+<section>
+  <h2>Who decides what</h2>
+  <p class="sub">The CEO acts on its own wherever the evidence points to one clear option. A short list of decisions always comes to me.</p>
+  <div class="two">
+    <div class="card"><h3>The CEO decides and acts</h3><ul>
+      <li>Fixes anything objectively broken: dead links, 404s, wrong counts, schema errors. It verifies the fix on the live site.</li>
+      <li>Triages, prioritizes and closes GitHub issues, with evidence.</li>
+      <li>Settles open questions that have a clear best path, writes down the decision and says how to reverse it.</li>
+      <li>Reorders tomorrow's focus and fixes problems one loop finds in another.</li>
+    </ul></div>
+    <div class="card"><h3>Always escalated to me</h3><ul>
+      <li>Spending money or signing up for anything paid</li>
+      <li>Affiliate and partner terms</li>
+      <li>Tax, legal and account risk</li>
+      <li>Brand identity: name, domain and voice</li>
+      <li>Overturning a settled decision</li>
+    </ul></div>
+  </div>
+</section>
+
+<section>
+  <h2>What keeps it honest</h2>
+  <p class="sub">Most of the work is making agents fail loudly instead of quietly. A clean exit is not a success, and a process being alive is not progress.</p>
+  <div class="guards">
+    <div class="card guard"><div class="t">Fenced lease + watchdog</div><p>Only one run can hold the business at a time. A run that dies or stalls is expired and I get a page.</p></div>
+    <div class="card guard"><div class="t">Memory cap per run</div><p>One run was killed by the system for using too much memory. Since then each run gets its own 8 GB box.</p></div>
+    <div class="card guard"><div class="t">Close gate</div><p>The run's due-loop list comes from the real clock every morning, never from yesterday's notes, and a missing loop can't close as OK.</p></div>
+    <div class="card guard"><div class="t">Finance scanner</div><p>A pre-commit check blocks business numbers from ever reaching git or the public site.</p></div>
+    <div class="card guard"><div class="t">Untrusted input</div><p>Emails, web pages and comments are data, never instructions, even when they speak to "the AI."</p></div>
+    <div class="card guard"><div class="t">Cross-lab review</div><p>Build work goes through a fixed pipeline. Claude plans and builds, and a model from a different lab (GPT-6.1) reviews every PR before merge.</p></div>
+  </div>
+</section>
+
+<footer>Built and run by Ben Coons. Data comes from the business's own run log through Oct 23, 2026. Money figures are left out on purpose.</footer>
+</div>
+<div id="tip"></div>
+</div>
+
+<script>
+const DATA = {"runs": [{"d": "2026-07-22", "s": "ok", "m": 76, "dep": false, "n": 9, "ok": 9}, {"d": "2026-07-23", "s": "ok", "m": 88, "dep": false, "n": 8, "ok": 8}, {"d": "2026-07-24", "s": "ok", "m": 106, "dep": false, "n": 9, "ok": 9}, {"d": "2026-07-25", "s": "ok", "m": 107, "dep": false, "n": 8, "ok": 8}, {"d": "2026-07-26", "s": "ok", "m": 113, "dep": false, "n": 8, "ok": 8}, {"d": "2026-07-27", "s": "ok", "m": 171, "dep": false, "n": 9, "ok": 9}, {"d": "2026-07-28", "s": "ok", "m": 201, "dep": false, "n": 8, "ok": 8}, {"d": "2026-07-29", "s": "ok", "m": 170, "dep": false, "n": 8, "ok": 8}, {"d": "2026-07-30", "s": "ok", "m": 205, "dep": false, "n": 8, "ok": 8}, {"d": "2026-07-31", "s": "ok", "m": 168, "dep": false, "n": 9, "ok": 9}, {"d": "2026-08-01", "s": "ok", "m": 196, "dep": false, "n": 10, "ok": 10}, {"d": "2026-08-02", "s": "ok", "m": 161, "dep": false, "n": 9, "ok": 9}, {"d": "2026-08-03", "s": "ok", "m": 185, "dep": false, "n": 9, "ok": 9}, {"d": "2026-08-04", "s": "ok", "m": 158, "dep": false, "n": 8, "ok": 8}, {"d": "2026-08-05", "s": "ok", "m": 193, "dep": false, "n": 8, "ok": 8}, {"d": "2026-08-06", "s": "ok", "m": 120, "dep": false, "n": 8, "ok": 8}, {"d": "2026-08-07", "s": "partial", "m": 188, "dep": false, "n": 9, "ok": 8}, {"d": "2026-08-08", "s": "partial", "m": 135, "dep": false, "n": 8, "ok": 7}, {"d": "2026-08-10", "s": "ok", "m": 210, "dep": false, "n": 9, "ok": 9}, {"d": "2026-08-11", "s": "ok", "m": 127, "dep": false, "n": 8, "ok": 8}, {"d": "2026-08-13", "s": "ok", "m": 196, "dep": false, "n": 8, "ok": 8}, {"d": "2026-08-14", "s": "ok", "m": 80, "dep": false, "n": 9, "ok": 9}, {"d": "2026-08-15", "s": "ok", "m": 66, "dep": false, "n": 9, "ok": 8}, {"d": "2026-08-16", "s": "ok", "m": 80, "dep": false, "n": 8, "ok": 7}, {"d": "2026-08-17", "s": "partial", "m": null, "dep": false, "n": 9, "ok": 9}, {"d": "2026-08-18", "s": "ok", "m": 62, "dep": true, "n": 8, "ok": 8}, {"d": "2026-08-19", "s": "ok", "m": 62, "dep": true, "n": 8, "ok": 8}, {"d": "2026-08-20", "s": "ok", "m": 67, "dep": false, "n": 8, "ok": 8}, {"d": "2026-08-21", "s": "ok", "m": 67, "dep": false, "n": 9, "ok": 9}, {"d": "2026-08-22", "s": "ok", "m": 77, "dep": true, "n": 9, "ok": 9}, {"d": "2026-08-23", "s": "ok", "m": 59, "dep": true, "n": 8, "ok": 8}, {"d": "2026-08-24", "s": "partial", "m": 162, "dep": true, "n": 9, "ok": 8}, {"d": "2026-08-25", "s": "ok", "m": 92, "dep": true, "n": 8, "ok": 8}, {"d": "2026-08-26", "s": "ok", "m": 98, "dep": true, "n": 8, "ok": 7}, {"d": "2026-08-27", "s": "ok", "m": 62, "dep": true, "n": 8, "ok": 8}, {"d": "2026-08-28", "s": "ok", "m": 67, "dep": true, "n": 9, "ok": 8}, {"d": "2026-08-29", "s": "ok", "m": 67, "dep": true, "n": 8, "ok": 7}, {"d": "2026-08-30", "s": "ok", "m": 60, "dep": true, "n": 8, "ok": 7}, {"d": "2026-08-31", "s": "ok", "m": 112, "dep": true, "n": 9, "ok": 8}, {"d": "2026-09-01", "s": "ok", "m": 91, "dep": true, "n": 10, "ok": 10}, {"d": "2026-09-02", "s": "ok", "m": 87, "dep": true, "n": 8, "ok": 7}, {"d": "2026-09-03", "s": "ok", "m": 76, "dep": true, "n": 8, "ok": 7}, {"d": "2026-09-04", "s": "ok", "m": 92, "dep": true, "n": 9, "ok": 9}, {"d": "2026-09-05", "s": "ok", "m": 109, "dep": true, "n": 8, "ok": 7}, {"d": "2026-09-06", "s": "partial", "m": 97, "dep": true, "n": 8, "ok": 6}, {"d": "2026-09-07", "s": "partial", "m": 112, "dep": true, "n": 9, "ok": 8}, {"d": "2026-09-08", "s": "partial", "m": 100, "dep": true, "n": 8, "ok": 7}, {"d": "2026-09-09", "s": "ok", "m": 97, "dep": true, "n": 8, "ok": 8}, {"d": "2026-09-10", "s": "ok", "m": 109, "dep": true, "n": 8, "ok": 7}, {"d": "2026-09-12", "s": "ok", "m": 102, "dep": true, "n": 8, "ok": 7}, {"d": "2026-09-13", "s": "ok", "m": 97, "dep": true, "n": 8, "ok": 7}, {"d": "2026-09-14", "s": "partial", "m": 417, "dep": true, "n": 9, "ok": 9}, {"d": "2026-09-15", "s": "ok", "m": 112, "dep": true, "n": 9, "ok": 9}, {"d": "2026-09-16", "s": "ok", "m": 101, "dep": true, "n": 8, "ok": 8}, {"d": "2026-09-17", "s": "ok", "m": 86, "dep": true, "n": 8, "ok": 8}, {"d": "2026-09-18", "s": "ok", "m": 96, "dep": true, "n": 9, "ok": 9}, {"d": "2026-09-19", "s": "ok", "m": 110, "dep": true, "n": 8, "ok": 7}, {"d": "2026-09-20", "s": "ok", "m": 98, "dep": true, "n": 8, "ok": 7}, {"d": "2026-09-21", "s": "ok", "m": 101, "dep": true, "n": 9, "ok": 9}, {"d": "2026-09-22", "s": "ok", "m": 112, "dep": true, "n": 9, "ok": 9}, {"d": "2026-09-23", "s": "ok", "m": 108, "dep": true, "n": 8, "ok": 8}, {"d": "2026-09-24", "s": "ok", "m": 99, "dep": true, "n": 8, "ok": 8}, {"d": "2026-09-25", "s": "ok", "m": 63, "dep": true, "n": 9, "ok": 9}, {"d": "2026-09-26", "s": "ok", "m": 68, "dep": true, "n": 8, "ok": 8}, {"d": "2026-09-27", "s": "ok", "m": 77, "dep": true, "n": 8, "ok": 8}, {"d": "2026-09-28", "s": "ok", "m": 98, "dep": true, "n": 9, "ok": 8}, {"d": "2026-09-29", "s": "ok", "m": 69, "dep": true, "n": 8, "ok": 7}, {"d": "2026-09-30", "s": "ok", "m": 59, "dep": true, "n": 8, "ok": 7}, {"d": "2026-10-01", "s": "ok", "m": 65, "dep": true, "n": 10, "ok": 9}, {"d": "2026-10-02", "s": "ok", "m": 57, "dep": true, "n": 9, "ok": 9}, {"d": "2026-10-03", "s": "ok", "m": 52, "dep": true, "n": 8, "ok": 8}, {"d": "2026-10-04", "s": "ok", "m": 72, "dep": true, "n": 8, "ok": 7}, {"d": "2026-10-05", "s": "ok", "m": 94, "dep": true, "n": 9, "ok": 9}, {"d": "2026-10-06", "s": "partial", "m": 72, "dep": true, "n": 8, "ok": 6}, {"d": "2026-10-07", "s": "ok", "m": 65, "dep": true, "n": 9, "ok": 9}, {"d": "2026-10-08", "s": "ok", "m": 67, "dep": true, "n": 8, "ok": 7}, {"d": "2026-10-09", "s": "ok", "m": 88, "dep": true, "n": 9, "ok": 8}, {"d": "2026-10-10", "s": "ok", "m": 87, "dep": true, "n": 8, "ok": 7}, {"d": "2026-10-11", "s": "ok", "m": 76, "dep": true, "n": 8, "ok": 7}, {"d": "2026-10-12", "s": "ok", "m": 129, "dep": true, "n": 9, "ok": 9}, {"d": "2026-10-13", "s": "ok", "m": 72, "dep": true, "n": 8, "ok": 7}, {"d": "2026-10-14", "s": "ok", "m": 82, "dep": true, "n": 9, "ok": 8}, {"d": "2026-10-15", "s": "ok", "m": 102, "dep": true, "n": 9, "ok": 8}, {"d": "2026-10-16", "s": "ok", "m": 92, "dep": true, "n": 9, "ok": 9}, {"d": "2026-10-17", "s": "ok", "m": 97, "dep": true, "n": 8, "ok": 7}, {"d": "2026-10-18", "s": "ok", "m": 78, "dep": true, "n": 8, "ok": 7}, {"d": "2026-10-19", "s": "partial", "m": 112, "dep": true, "n": 9, "ok": 8}, {"d": "2026-10-20", "s": "ok", "m": 97, "dep": true, "n": 8, "ok": 7}, {"d": "2026-10-21", "s": "ok", "m": 89, "dep": true, "n": 9, "ok": 8}, {"d": "2026-10-22", "s": "ok", "m": 197, "dep": true, "n": 10, "ok": 9}, {"d": "2026-10-23", "s": "ok", "m": 101, "dep": true, "n": 10, "ok": 9}], "today": [{"l": "email", "s": "ok", "a": "03:05", "b": "03:10"}, {"l": "finance", "s": "nothing-to-do", "a": "03:10", "b": "03:10"}, {"l": "conversion", "s": "ok", "a": "03:11", "b": "03:17"}, {"l": "tracker", "s": "ok", "a": "03:17", "b": "03:21"}, {"l": "content", "s": "ok", "a": "03:11", "b": "03:20"}, {"l": "dp", "s": "ok", "a": "03:23", "b": "03:35"}, {"l": "deep-discovery", "s": "ok", "a": "03:38", "b": "03:46"}, {"l": "offer", "s": "ok", "a": "03:48", "b": "04:08"}, {"l": "social", "s": "ok", "a": "04:10", "b": "04:20"}, {"l": "digest", "s": "ok", "a": "04:31", "b": "04:40"}], "ai": [{"w": "2026-03-09", "c": 17}, {"w": "2026-03-16", "c": 146}, {"w": "2026-03-23", "c": 263}, {"w": "2026-03-30", "c": 184}, {"w": "2026-04-06", "c": 407}, {"w": "2026-04-13", "c": 468}, {"w": "2026-04-20", "c": 997}, {"w": "2026-04-27", "c": 1243}, {"w": "2026-05-04", "c": 1938}, {"w": "2026-05-11", "c": 2372}, {"w": "2026-05-18", "c": 2634}, {"w": "2026-05-25", "c": 2353}, {"w": "2026-06-01", "c": 2975}, {"w": "2026-06-08", "c": 3348}, {"w": "2026-06-15", "c": 3301}, {"w": "2026-06-22", "c": 3907}, {"w": "2026-06-29", "c": 3670}, {"w": "2026-07-06", "c": 5305}, {"w": "2026-07-13", "c": 6188}, {"w": "2026-07-20", "c": 5075}, {"w": "2026-07-27", "c": 3504}, {"w": "2026-08-03", "c": 5209}, {"w": "2026-08-10", "c": 7783}, {"w": "2026-08-17", "c": 5576}, {"w": "2026-08-24", "c": 6905}, {"w": "2026-08-31", "c": 8308}, {"w": "2026-09-07", "c": 9573}, {"w": "2026-09-14", "c": 11279}, {"w": "2026-09-21", "c": 10675}, {"w": "2026-09-28", "c": 10355}, {"w": "2026-10-05", "c": 8969}, {"w": "2026-10-12", "c": 9533}], "aiTotal": 146058, "aiThrough": "2026-10-19"};
+const $ = s => document.querySelector(s);
+const css = v => getComputedStyle($('.viz-root')).getPropertyValue(v).trim();
+const NS = 'http://www.w3.org/2000/svg';
+const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+
+/* theme */
+$('#theme').onclick = () => {
+  const r = document.documentElement; const dark = r.dataset.theme === 'dark';
+  r.dataset.theme = dark ? 'light' : 'dark'; $('#theme').textContent = dark ? 'Dark mode' : 'Light mode'; drawAll();
+};
+
+/* tooltip */
+const tip = $('#tip');
+function showTip(ev, value, label) {
+  tip.replaceChildren(); const b = document.createElement('b'); b.textContent = value; const s = document.createElement('div');
+  s.className = 's'; s.textContent = label; tip.append(b, s); tip.style.opacity = 1;
+  const r = ev.target.getBoundingClientRect ? ev.target.getBoundingClientRect() : null;
+  const x = ev.clientX ?? (r.left + r.width / 2), y = ev.clientY ?? r.top;
+  tip.style.left = Math.min(x + 14, innerWidth - 300) + 'px'; tip.style.top = (y + 14) + 'px';
+}
+const hideTip = () => tip.style.opacity = 0;
+function hover(node, value, label) {
+  node.setAttribute('tabindex', '0'); node.classList.add('mark');
+  node.addEventListener('pointermove', e => showTip(e, value, label));
+  node.addEventListener('focus', e => showTip(e, value, label));
+  node.addEventListener('pointerleave', hideTip); node.addEventListener('blur', hideTip);
+}
+
+/* tiles */
+const runs = DATA.runs;
+const clean = runs.filter(r => r.s === 'ok').length;
+const loops = runs.reduce((a, r) => a + r.n, 0);
+const deploys = runs.filter(r => r.dep).length;
+const mins = runs.map(r => r.m).filter(Boolean).sort((a, b) => a - b);
+const median = mins[Math.floor(mins.length / 2)];
+[[runs.length, 'mornings logged'], [clean, 'finished fully clean'], [loops, 'agent loop runs'], [deploys, 'production deploys'], [median + ' min', 'median run, start to finish']]
+  .forEach(([v, k]) => { const t = document.createElement('div'); t.className = 'tile'; const a = document.createElement('div'); a.className = 'v'; a.textContent = v; const b = document.createElement('div'); b.className = 'k'; b.textContent = k; t.append(a, b); $('#tiles').append(t); });
+$('#histSub').textContent = `${runs.length} daily runs. Bar height is minutes from start to finish, and the median run took ${median} minutes. ${clean} finished with every loop clean. In the other ${runs.length - clean}, a loop failed and the run recorded the failure and carried on. None of them were silent.`;
+
+/* flow detail */
+const INFO = {
+  timer: ['03:03 · Timer fires', 'A systemd timer on a home server (a ThinkCentre in my house) starts the run. If the start check refuses, it retries every 15 minutes until 8 am, then pages my phone.'],
+  guard: ['Guard', 'A tracked precheck reserves a fenced 6-hour lease so two runs can never overlap. A per-minute watchdog expires a session that dies or never starts. Each run executes inside its own 8 GB memory box.'],
+  intake: ['Intake', 'The CEO reads the real clock and builds the list of loops due today. It reads my interview answers, the inbox, the GitHub issue queue and settled decisions. Then it runs a 60-second check that the backups, browsers, CI and background jobs are actually alive.'],
+  ceo: ['CEO agent · Claude Opus 5.5', 'It dispatches each loop to an operator agent, arms a watcher for each one and checks each structured report. A loop counts as complete only when its report arrives or the CEO rebuilds the result from ground truth: state file, log entry and commits.'],
+  email: ['Email loop', 'Runs alone first, because it needs the signed-in browser before the publishing chain takes it, and its receipts feed finance. It never sends, deletes or commits.'],
+  content: ['Content loop', 'Pulls Google, Bing, GA4 and Vercel analytics, then keeps pages accurate and fixes SEO problems. It publishes only fact-checked content, and publishing nothing is an acceptable result.'],
+  dp: ['Data-point loop', 'Scrapes reader reports about which deposits trigger which bank bonuses and judges each one against a written policy. Then it publishes the verified ones.'],
+  deep: ['Deep-discovery loop', 'A bank-bonus hunter. Cheap Haiku scouts sort the search results, and the operator makes every verdict and writes a file on each candidate. It never publishes.'],
+  offer: ['Offer-accuracy loop', 'Re-checks live offers against the banks\' own pages in a separate, never-signed-in browser. It updates or retires anything that has changed.'],
+  social: ['Social loop', 'Stages posts for offers that are live and approved. Code does the actual publishing.'],
+  ship: ['Ship (the CEO does it)', 'Loops commit locally but never push. The CEO makes one push a day, proves the production deploy exists and is live, checks CI and pings search engines only for pages that return 200.'],
+  weekly: ['Weekly add-ons', 'Monday checks site integrity, Wednesday runs a protected growth slot that ships 1–2 experiments with before/after tracking, and Friday sends the subscriber digest after a verified deploy.'],
+  finance: ['Finance loop', 'Books receipts into a ledger. A cadence gate dispatches it only when there is something to book. The numbers go only to my inbox, never to git or the site.'],
+  conversion: ['Conversion loop', 'Reads anonymous click counters to see which offers readers act on. Days distorted by bots and crawlers are left out.'],
+  tracker: ['Tracker loop', 'Reads anonymous usage of the site\'s bonus tracker to see what readers are actually stacking.'],
+  monthly: ['Monthlies', 'Competitor intel on the 15th, an operations audit on the 22nd, a brand review on the 8th, and affiliate and ads readiness at quarter boundaries. These are research only: a GO decision comes to me, never an action.'],
+  synth: ['CEO synthesis', 'Decides open questions that have a clear answer, files work as GitHub issues and dispatches build lanes. Opus implements, Sonnet builds and GPT-6.1 reviews the PR.'],
+  close: ['Close gate → report', 'A deterministic script checks that every loop due today has a record. Then the CEO emails me a digest: what it did, what it decided and what needs me.'],
+};
+document.querySelectorAll('.node').forEach(n => n.addEventListener('click', () => {
+  document.querySelectorAll('.node.active').forEach(a => a.classList.remove('active')); n.classList.add('active');
+  const [t, p] = INFO[n.dataset.k]; const d = $('#detail'); d.replaceChildren();
+  const a = document.createElement('div'); a.className = 't'; a.textContent = t; const b = document.createElement('p'); b.textContent = p; d.append(a, b);
+  if (innerWidth < 720) d.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}));
+
+/* gantt */
+const LANE = { email: 'neutral', finance: 'intel', conversion: 'intel', tracker: 'intel', content: 'pub', dp: 'pub', 'deep-discovery': 'pub', offer: 'pub', social: 'pub', digest: 'pub' };
+const NAME = { email: 'Email', finance: 'Finance', conversion: 'Conversion', tracker: 'Tracker', content: 'Content', dp: 'Data points', 'deep-discovery': 'Deep discovery', offer: 'Offer accuracy', social: 'Social', digest: 'Subscriber digest (Fri)' };
+const toMin = s => { const [h, m] = s.split(':').map(Number); return h * 60 + m; };
+function drawGantt() {
+  const svg = $('#gantt'); svg.replaceChildren();
+  const W = svg.clientWidth || 900, left = Math.min(170, W * 0.32), right = 16, rowH = 30, top = 8;
+  const rows = [{ l: 'CEO run', a: '03:03', b: '04:44', lane: 'neutral', s: 'ok', note: 'whole run' },
+    ...DATA.today.map(t => ({ l: NAME[t.l] || t.l, a: t.a, b: t.b, lane: LANE[t.l] || 'pub', s: t.s })),
+    { l: 'Ship: push, deploy, verify', a: '04:20', b: '04:31', lane: 'neutral', s: 'ok', note: 'CEO step between social and digest (the runbook holds the digest until the deploy is verified)' }];
+  rows.sort((x, y) => toMin(x.a) - toMin(y.a) || (x.l === 'CEO run' ? -1 : 1));
+  const t0 = toMin('03:00'), t1 = toMin('04:50'), H = top + rows.length * rowH + 28;
+  svg.setAttribute('height', H);
+  const x = m => left + (m - t0) / (t1 - t0) * (W - left - right);
+  for (let m = t0; m <= t1; m += 10) {
+    el('line', { x1: x(m), x2: x(m), y1: top, y2: H - 22, stroke: css('--grid'), 'stroke-width': 1 }, svg);
+    if ((m - t0) % 20 === 0) { const tx = el('text', { x: x(m), y: H - 6, 'text-anchor': 'middle', class: 'axis-label' }, svg); tx.textContent = `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`; }
+  }
+  const col = { pub: css('--pub'), intel: css('--intel'), neutral: css('--neutral') };
+  const tb = $('#ganttTable'); tb.replaceChildren(); const hr = tb.insertRow(); ['Loop', 'Start', 'End', 'Minutes', 'Status'].forEach(h => { const th = document.createElement('th'); th.textContent = h; hr.append(th); });
+  rows.forEach((r, i) => {
+    const y = top + i * rowH, a = toMin(r.a), b = toMin(r.b), dur = b - a;
+    const name = el('text', { x: left - 10, y: y + rowH / 2 + 4, 'text-anchor': 'end', class: r.l === 'CEO run' ? 'lbl' : 'lbl2' }, svg); name.textContent = r.l;
+    let mark;
+    if (dur === 0) {
+      mark = el('circle', { cx: x(a), cy: y + rowH / 2, r: 5, fill: 'none', stroke: col[r.lane], 'stroke-width': 2 }, svg);
+      const s = el('text', { x: x(a) + 12, y: y + rowH / 2 + 4, class: 'axis-label' }, svg); s.textContent = 'gate: not due, skipped';
+    } else {
+      mark = el('rect', { x: x(a), y: y + 6, width: Math.max(4, x(b) - x(a)), height: rowH - 12, rx: 4, fill: col[r.lane], opacity: r.l === 'CEO run' ? 0.35 : 1 }, svg);
+      if (x(b) - x(a) > 34) { const s = el('text', { x: x(a) + 7, y: y + rowH / 2 + 4, fill: '#fff', 'font-size': 11, 'pointer-events': 'none' }, svg); s.textContent = dur + 'm'; }
+    }
+    hover(mark, `${r.a}–${r.b} · ${dur} min`, `${r.l}${r.s !== 'ok' ? ' · ' + r.s : ''}${r.note ? ' · ' + r.note : ''}`);
+    const tr = tb.insertRow(); [r.l, r.a, r.b, dur, r.s].forEach(v => { tr.insertCell().textContent = v; });
+  });
+}
+
+/* history */
+function drawHist() {
+  const svg = $('#hist'); svg.replaceChildren();
+  const W = svg.clientWidth || 900, H = 240, l = 36, r = 8, t = 14, b = 26;
+  svg.setAttribute('height', H);
+  const max = Math.ceil(Math.max(...mins) / 100) * 100, n = runs.length, slot = (W - l - r) / n, bw = Math.min(24, Math.max(2, slot - 2));
+  const y = v => t + (1 - v / max) * (H - t - b);
+  [...Array(max / 100 + 1).keys()].map(k => k * 100).forEach(v => {
+    el('line', { x1: l, x2: W - r, y1: y(v), y2: y(v), stroke: v ? css('--grid') : css('--axis'), 'stroke-width': 1 }, svg);
+    const tx = el('text', { x: l - 6, y: y(v) + 4, 'text-anchor': 'end', class: 'axis-label' }, svg); tx.textContent = v;
+  });
+  const ul = el('text', { x: l, y: 10, class: 'axis-label' }, svg); ul.textContent = 'minutes';
+  const tb = $('#histTable'); tb.replaceChildren(); const hr = tb.insertRow(); ['Date', 'Status', 'Minutes', 'Loops ok', 'Deployed'].forEach(h => { const th = document.createElement('th'); th.textContent = h; hr.append(th); });
+  let lastMonth = '';
+  runs.forEach((d, i) => {
+    const cx = l + i * slot + (slot - bw) / 2, m = d.m;
+    const fill = d.s === 'ok' ? css('--good') : css('--warning');
+    let mark;
+    if (m) {
+      const h = H - b - y(m), yy = y(m);
+      mark = el('path', { d: `M${cx},${H - b} V${yy + 4} Q${cx},${yy} ${cx + 4 > cx + bw / 2 ? cx + bw / 2 : cx + 4},${yy} H${cx + bw - Math.min(4, bw / 2)} Q${cx + bw},${yy} ${cx + bw},${yy + Math.min(4, h)} V${H - b} Z`, fill }, svg);
+    } else {
+      mark = el('rect', { x: cx, y: H - b - 6, width: bw, height: 6, fill: 'none', stroke: fill }, svg);
+    }
+    const hit = el('rect', { x: l + i * slot, y: t, width: slot, height: H - t - b, fill: 'transparent' }, svg);
+    const date = new Date(d.d + 'T12:00:00');
+    const ds = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    hover(hit, m ? `${m} min` : 'time not recorded', `${ds} · ${d.s === 'ok' ? '✓ clean' : '◐ partial'} · ${d.ok}/${d.n} loops ok${d.dep ? ' · deployed' : ''}`);
+    hit.addEventListener('pointerenter', () => mark.setAttribute('opacity', .7)); hit.addEventListener('pointerleave', () => mark.removeAttribute('opacity'));
+    const mo = d.d.slice(0, 7);
+    if (mo !== lastMonth) { lastMonth = mo; const tx = el('text', { x: cx, y: H - 8, class: 'axis-label' }, svg); tx.textContent = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
+    const tr = tb.insertRow(); [d.d, d.s, m ?? '—', `${d.ok}/${d.n}`, d.dep ? 'yes' : 'no'].forEach(v => { tr.insertCell().textContent = v; });
+  });
+  const mi = runs.reduce((a, d, i) => (d.m || 0) > (runs[a].m || 0) ? i : a, 0);
+  const pk = el('text', { x: Math.min(l + mi * slot + slot / 2, W - 60), y: y(runs[mi].m) - 6, 'text-anchor': 'middle', class: 'lbl2' }, svg); pk.textContent = runs[mi].m + ' min';
+}
+
+/* AI citations */
+function drawAI() {
+  const svg = $('#ai'); svg.replaceChildren();
+  const pts = DATA.ai, W = svg.clientWidth || 900, H = 230, l = 48, r = 64, t = 16, b = 26;
+  svg.setAttribute('height', H);
+  const max = Math.ceil(Math.max(...pts.map(p => p.c)) / 4000) * 4000;
+  const x = i => l + i / (pts.length - 1) * (W - l - r), y = v => t + (1 - v / max) * (H - t - b);
+  for (let v = 0; v <= max; v += 4000) {
+    el('line', { x1: l, x2: W - r, y1: y(v), y2: y(v), stroke: v ? css('--grid') : css('--axis'), 'stroke-width': 1 }, svg);
+    const tx = el('text', { x: l - 6, y: y(v) + 4, 'text-anchor': 'end', class: 'axis-label' }, svg); tx.textContent = v ? (v / 1000) + 'k' : '0';
+  }
+  let lastMonth = '';
+  pts.forEach((p, i) => { const mo = p.w.slice(0, 7); if (mo !== lastMonth && i < pts.length - 1) { lastMonth = mo; const tx = el('text', { x: x(i), y: H - 8, class: 'axis-label' }, svg); tx.textContent = new Date(p.w + 'T12:00:00').toLocaleDateString('en-US', { month: 'short' }); } });
+  const line = pts.map((p, i) => `${i ? 'L' : 'M'}${x(i)},${y(p.c)}`).join(' ');
+  el('path', { d: `${line} L${x(pts.length - 1)},${y(0)} L${x(0)},${y(0)} Z`, fill: css('--pub'), opacity: .1 }, svg);
+  el('path', { d: line, fill: 'none', stroke: css('--pub'), 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, svg);
+  const last = pts[pts.length - 1];
+  el('circle', { cx: x(pts.length - 1), cy: y(last.c), r: 4, fill: css('--pub'), stroke: css('--surface-1'), 'stroke-width': 2 }, svg);
+  const lt = el('text', { x: x(pts.length - 1) + 8, y: y(last.c) + 4, class: 'lbl' }, svg); lt.textContent = last.c.toLocaleString();
+  const cross = el('line', { y1: t, y2: H - b, stroke: css('--axis'), 'stroke-width': 1, opacity: 0 }, svg);
+  const dot = el('circle', { r: 4, fill: css('--pub'), stroke: css('--surface-1'), 'stroke-width': 2, opacity: 0 }, svg);
+  const hit = el('rect', { x: l, y: t, width: W - l - r, height: H - t - b, fill: 'transparent', tabindex: 0 }, svg);
+  const at = (e, i) => { const p = pts[i]; cross.setAttribute('x1', x(i)); cross.setAttribute('x2', x(i)); cross.setAttribute('opacity', 1);
+    dot.setAttribute('cx', x(i)); dot.setAttribute('cy', y(p.c)); dot.setAttribute('opacity', 1);
+    showTip(e, `${p.c.toLocaleString()} citations`, 'week of ' + new Date(p.w + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })); };
+  hit.addEventListener('pointermove', e => { const bx = svg.getBoundingClientRect(); const i = Math.max(0, Math.min(pts.length - 1, Math.round((e.clientX - bx.left - l) / (W - l - r) * (pts.length - 1)))); at(e, i); });
+  hit.addEventListener('focus', e => at(e, pts.length - 1));
+  const off = () => { hideTip(); cross.setAttribute('opacity', 0); dot.setAttribute('opacity', 0); };
+  hit.addEventListener('pointerleave', off); hit.addEventListener('blur', off);
+  const tb = $('#aiTable'); tb.replaceChildren(); const hr = tb.insertRow(); ['Week of', 'Bing AI citations'].forEach(h => { const th = document.createElement('th'); th.textContent = h; hr.append(th); });
+  pts.forEach(p => { const tr = tb.insertRow(); tr.insertCell().textContent = p.w; tr.insertCell().textContent = p.c.toLocaleString(); });
+}
+$('#aiSub').textContent = `How often Bing's AI answers, including Copilot, cited the site each week, as reported by Bing Webmaster Tools. That's ${DATA.aiTotal.toLocaleString()} citations since March. The first week it was cited had ${DATA.ai.find(p => p.c > 0).c}, and the latest full week had ${DATA.ai[DATA.ai.length - 1].c.toLocaleString()}.`;
+function drawAll() { drawGantt(); drawHist(); drawAI(); }
+drawAll(); addEventListener('resize', drawAll);
+</script>
+</body>
+</html>
