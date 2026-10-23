@@ -5,172 +5,236 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>An AI CEO runs my business every morning · Ben Coons</title>
+<script>try{const s=localStorage.getItem('theme');document.documentElement.dataset.theme=s||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark')}catch(e){}</script>
 <style>
-.viz-root {
-  color-scheme: light;
-  --page: #f9f9f7; --surface-1: #fcfcfb; --surface-2: #f0efec;
-  --text-primary: #0b0b0b; --text-secondary: #52514e; --muted: #898781;
-  --grid: #e1e0d9; --axis: #c3c2b7; --ring: rgba(11,11,11,0.10);
-  --pub: #2a78d6; --intel: #eb6834; --neutral: #898781;
-  --good: #0ca30c; --warning: #fab219; --glow: rgba(42,120,214,0.18);
-}
-:root[data-theme="dark"] .viz-root {
+@font-face { font-family: "Onest"; src: url("onest.ttf") format("truetype"); font-weight: 100 900; font-display: swap; }
+:root {
   color-scheme: dark;
-  --page: #0d0d0d; --surface-1: #1a1a19; --surface-2: #232322;
-  --text-primary: #f0efec; --text-secondary: #c3c2b7; --muted: #898781;
-  --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10);
-  --pub: #3987e5; --intel: #d95926; --neutral: #6f6e69;
-  --glow: rgba(57,135,229,0.22);
+  --page: #111114; --surface: #1A1A1F; --raised: #22222A;
+  --border: #2C2C36; --border-strong: #3A3A46;
+  --text-primary: #E8E8EC; --text-secondary: #ADADB8; --muted: #8F8F9B;
+  --teal: #0F7E7E; --teal-light: #2EC4B6; --orange-light: #F4845F; --purple-light: #A87FD6;
+  --grid: #2C2C36; --axis: #3A3A46;
+  --pub: #1FA9A5; --intel: #E0702F; --neutral: #6B6A74; --on-series: #111114;
+  --good: #0ca30c; --warning: #fab219;
+  --surface-1: #22222A;
+  --hover-edge: color-mix(in srgb, var(--teal-light) 60%, transparent);
+  --ring: color-mix(in srgb, var(--teal-light) 25%, transparent);
+  --shadow: 0 1px 2px rgba(0,0,0,.35), 0 10px 28px -16px rgba(0,0,0,.7);
+  --glow: radial-gradient(60% 50% at 50% 0%, color-mix(in srgb, var(--teal-light) 10%, transparent), transparent 70%);
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --page: #F1F1F4; --surface: #F8F8FA; --raised: #FFFFFF;
+  --border: #C9C9D3; --border-strong: #B4B4BF;
+  --text-primary: #232228; --text-secondary: #55535C; --muted: #6B6A74;
+  --teal-light: #0B6B6B; --orange-light: #B1350C; --purple-light: #6D3FA8;
+  --grid: #E1E1E7; --axis: #C9C9D3;
+  --pub: #00908A; --intel: #D95F1A; --neutral: #8F8F9B; --on-series: #FFFFFF;
+  --surface-1: #FFFFFF;
+  --shadow: 0 1px 2px rgba(17,17,20,.10), 0 10px 28px -16px rgba(17,17,20,.28);
+  --glow: radial-gradient(60% 50% at 50% 0%, color-mix(in srgb, #0F7E7E 8%, transparent), transparent 70%);
 }
 * { box-sizing: border-box; }
-body { margin: 0; }
-.viz-root {
-  background: var(--page); color: var(--text-primary);
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  line-height: 1.5; min-height: 100vh;
-}
-.wrap { max-width: 1040px; margin: 0 auto; padding: 56px 24px 80px; }
-.eyebrow { color: var(--muted); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
-h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.1; margin: 10px 0 14px; letter-spacing: -0.02em; }
-h2 { font-size: 22px; margin: 0 0 4px; letter-spacing: -0.01em; }
-.lede { color: var(--text-secondary); font-size: 18px; max-width: 720px; margin: 0; }
-.sub { color: var(--text-secondary); margin: 0 0 20px; max-width: 760px; }
-section { margin-top: 64px; }
-.card { background: var(--surface-1); border: 1px solid var(--ring); border-radius: 14px; padding: 24px; }
-.theme-btn { float: right; background: none; border: 1px solid var(--ring); color: var(--text-secondary);
-  border-radius: 8px; padding: 6px 10px; font: inherit; font-size: 13px; cursor: pointer; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--page); color: var(--text-primary);
+  font-family: "Onest", ui-sans-serif, system-ui, sans-serif; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+.viz-root { background: var(--glow) no-repeat; min-height: 100vh; }
+a { color: var(--teal-light); text-underline-offset: 3px; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px 80px; }
 
-/* stat tiles */
-.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-top: 36px; }
-.tile { background: var(--surface-1); border: 1px solid var(--ring); border-radius: 12px; padding: 16px 18px; }
-.tile .v { font-size: 34px; font-weight: 650; letter-spacing: -0.02em; }
-.tile .k { color: var(--text-secondary); font-size: 14px; }
+/* top bar */
+.bar { display: flex; align-items: center; justify-content: space-between; height: 64px; border-bottom: 1px solid var(--border); margin-bottom: 72px; }
+.bar .me { font-weight: 650; letter-spacing: -0.01em; }
+.bar .right { display: flex; align-items: center; gap: 14px; font-size: 14px; }
+.bar a { color: var(--text-secondary); text-decoration: none; }
+.bar a:hover { color: var(--text-primary); }
+.icon-btn { width: 40px; height: 40px; display: grid; place-items: center; background: var(--surface); border: 1px solid var(--border-strong);
+  border-radius: 4px; color: var(--text-secondary); cursor: pointer; }
+.icon-btn:hover { color: var(--text-primary); border-color: var(--hover-edge); }
+.icon-btn svg { width: 18px; height: 18px; }
 
-/* flow diagram */
-.flow { display: grid; gap: 14px; }
-.row { display: grid; gap: 14px; }
-.node { position: relative; background: var(--surface-2); border: 1px solid var(--ring); border-radius: 10px;
-  padding: 12px 14px; cursor: pointer; transition: transform .15s, box-shadow .15s, border-color .15s; text-align: left;
-  font: inherit; color: inherit; width: 100%; }
-.node:hover, .node:focus-visible, .node.active { transform: translateY(-2px); box-shadow: 0 0 0 3px var(--glow); outline: none; }
-.node .t { font-weight: 600; }
+/* hero */
+.hero { text-align: center; max-width: 820px; margin: 0 auto; }
+.brand { display: inline-flex; align-items: center; gap: 10px; color: var(--text-secondary); font-size: 14px; font-weight: 500;
+  padding: 6px 12px 6px 8px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); }
+.brand img { width: 20px; height: 20px; }
+h1 { font-size: clamp(36px, 6vw, 62px); line-height: 1.04; letter-spacing: -0.035em; font-weight: 700; margin: 22px 0 18px; }
+h1 em { font-style: normal; color: var(--teal-light); }
+.lede { color: var(--text-secondary); font-size: clamp(17px, 2vw, 19px); max-width: 700px; margin: 0 auto; }
+.ctas { display: flex; gap: 12px; justify-content: center; margin-top: 30px; flex-wrap: wrap; }
+.btn { display: inline-flex; align-items: center; gap: 8px; height: 46px; padding: 0 22px; border-radius: 4px; font-weight: 600; font-size: 15px;
+  text-decoration: none; border: 1px solid transparent; transition: box-shadow .15s, border-color .15s, background .15s; }
+.btn.primary { background: var(--teal); color: #fff; }
+.btn.primary:hover { box-shadow: 0 0 0 4px var(--ring), 0 8px 24px -10px #2EC4B6; }
+.btn.secondary { background: var(--surface); color: var(--text-primary); border-color: var(--border-strong); }
+.btn.secondary:hover { border-color: var(--hover-edge); }
+
+/* stat strip */
+.strip { margin-top: 56px; display: grid; grid-template-columns: repeat(5, 1fr); background: var(--raised); border: 1px solid var(--border);
+  border-radius: 4px; box-shadow: var(--shadow); }
+.tile { padding: 20px 22px; border-left: 1px solid var(--border); }
+.tile:first-child { border-left: 0; }
+.tile .v { font-size: 30px; font-weight: 650; letter-spacing: -0.02em; line-height: 1.1; }
+.tile .k { color: var(--muted); font-size: 13px; margin-top: 4px; }
+@media (max-width: 820px) { .strip { grid-template-columns: repeat(2, 1fr); } .tile { border-left: 0; border-top: 1px solid var(--border); }
+  .tile:nth-child(-n+2) { border-top: 0; } .tile:nth-child(even) { border-left: 1px solid var(--border); } .tile:last-child { grid-column: 1 / -1; border-left: 0; } }
+
+/* sections */
+main { counter-reset: sec; }
+section { margin-top: 96px; counter-increment: sec; scroll-margin-top: 24px; }
+.kicker { display: block; color: var(--teal-light); font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 8px; }
+.kicker::before { content: counter(sec, decimal-leading-zero) " · "; color: var(--muted); }
+h2 { font-size: clamp(24px, 3vw, 30px); line-height: 1.2; letter-spacing: -0.02em; margin: 0 0 8px; font-weight: 650; }
+h3 { font-size: 16px; margin: 0; font-weight: 600; }
+.sub { color: var(--text-secondary); margin: 0 0 24px; max-width: 760px; }
+.card { background: var(--raised); border: 1px solid var(--border); border-radius: 4px; padding: 24px; box-shadow: var(--shadow); }
+
+/* flow */
+.flow-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; color: var(--text-secondary); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.link-btn { background: none; border: 0; color: var(--teal-light); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; padding: 4px 0; }
+.flow { display: grid; gap: 0; }
+.row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items: start; }
+details.node { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; transition: border-color .15s, box-shadow .15s; }
+details.node:hover { border-color: var(--hover-edge); }
+details.node[open] { border-color: var(--hover-edge); box-shadow: 0 0 0 3px var(--ring); }
+details.node > summary { list-style: none; cursor: pointer; padding: 12px 40px 12px 14px; position: relative; }
+details.node > summary::-webkit-details-marker { display: none; }
+details.node > summary:focus-visible { outline: 2px solid var(--teal-light); outline-offset: 2px; border-radius: 4px; }
+details.node > summary::after { content: ""; position: absolute; right: 14px; top: 17px; width: 8px; height: 8px;
+  border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); transition: transform .2s; }
+details.node[open] > summary::after { transform: rotate(-135deg); top: 21px; }
+.node .t { font-weight: 600; font-size: 15px; }
 .node .d { color: var(--text-secondary); font-size: 13px; }
-.node .who { color: var(--muted); font-size: 12px; margin-top: 4px; }
-.node.ceo { border-color: var(--text-secondary); }
-.node.pub { border-left: 4px solid var(--pub); }
-.node.intel { border-left: 4px solid var(--intel); }
-.node.dim { opacity: .62; }
-.lanes { display: grid; grid-template-columns: 1.6fr 1fr; gap: 18px; }
-.lane { border: 1px dashed var(--axis); border-radius: 12px; padding: 14px; display: grid; gap: 10px; align-content: start; }
-.lane h3 { margin: 0; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.node .who { display: inline-block; margin-top: 6px; font-size: 12px; color: var(--teal-light); border: 1px solid var(--ring); border-radius: 999px; padding: 1px 8px; }
+.node .more { margin: 0; padding: 0 14px 14px; color: var(--text-secondary); font-size: 14px; border-top: 1px solid var(--border); padding-top: 10px; }
+.node.ceo { background: color-mix(in srgb, var(--teal-light) 7%, var(--surface)); border-color: color-mix(in srgb, var(--teal-light) 35%, var(--border)); }
+.node.pub { border-left: 3px solid var(--pub); }
+.node.intel { border-left: 3px solid var(--intel); }
+.node.dim .t { color: var(--text-secondary); }
+.lanes { display: grid; grid-template-columns: 1.55fr 1fr; gap: 16px; }
+.lane { border: 1px dashed var(--border-strong); border-radius: 4px; padding: 14px; display: grid; gap: 0; align-content: start; }
+.lane h3 { font-size: 14px; display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
 .lane h3 small { color: var(--muted); font-weight: 400; }
-.swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
-.arrow { height: 22px; position: relative; }
-.arrow::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: var(--axis); }
-.arrow::after { content: ""; position: absolute; left: calc(50% - 3px); top: 0; width: 8px; height: 8px; border-radius: 50%;
-  background: var(--pub); animation: drop 1.8s linear infinite; }
-@keyframes drop { from { top: -4px; opacity: 0 } 20% { opacity: 1 } to { top: 18px; opacity: 0 } }
-.chain { display: grid; gap: 6px; }
-.chain .link { height: 10px; width: 2px; background: var(--axis); margin-left: 18px; }
-.split { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.detail { margin-top: 18px; min-height: 92px; border-top: 1px solid var(--grid); padding-top: 16px; }
-.detail .t { font-weight: 650; font-size: 17px; }
-.detail p { margin: 4px 0 0; color: var(--text-secondary); max-width: 820px; }
-.hint { color: var(--muted); font-size: 13px; }
-@media (max-width: 720px) { .lanes, .split { grid-template-columns: 1fr; } }
-@media (prefers-reduced-motion: reduce) { .arrow::after { animation: none; display: none; } }
+.arrow { height: 26px; position: relative; }
+.arrow::before { content: ""; position: absolute; left: 50%; top: 2px; bottom: 2px; width: 2px; margin-left: -1px; background: var(--border-strong); }
+.arrow::after { content: ""; position: absolute; left: 50%; margin-left: -3px; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--teal-light); box-shadow: 0 0 10px var(--teal-light); animation: drop 1.8s linear infinite; }
+@keyframes drop { from { top: 0; opacity: 0 } 25% { opacity: 1 } to { top: 20px; opacity: 0 } }
+.link { height: 8px; width: 2px; background: var(--border-strong); margin-left: 20px; }
+@media (max-width: 760px) { .lanes, .row3 { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .arrow::after { animation: none; } .arrow::after { display: none; } }
 
 /* charts */
-.legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; color: var(--text-secondary); margin-bottom: 10px; }
-.legend span { display: inline-flex; align-items: center; gap: 6px; }
 svg text { font-family: inherit; }
 .axis-label { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
-.lbl { fill: var(--text-primary); font-size: 12px; }
+.lbl { fill: var(--text-primary); font-size: 12px; font-weight: 500; }
 .lbl2 { fill: var(--text-secondary); font-size: 12px; }
 .mark { transition: opacity .12s; }
 .mark:hover, .mark:focus { opacity: .8; outline: none; }
-#tip { position: fixed; pointer-events: none; background: var(--surface-1); border: 1px solid var(--ring);
-  border-radius: 8px; padding: 8px 10px; font-size: 13px; box-shadow: 0 6px 24px rgba(0,0,0,.25);
-  opacity: 0; transition: opacity .1s; z-index: 10; max-width: 280px; }
-#tip b { display: block; font-size: 15px; }
+#tip { position: fixed; pointer-events: none; background: var(--raised); border: 1px solid var(--border-strong);
+  border-radius: 4px; padding: 8px 10px; font-size: 13px; box-shadow: var(--shadow); opacity: 0; transition: opacity .1s; z-index: 10; max-width: 280px; }
+#tip b { display: block; font-size: 15px; font-variant-numeric: tabular-nums; }
 #tip .s { color: var(--text-secondary); }
-details { margin-top: 14px; color: var(--text-secondary); font-size: 14px; }
+.card > details { margin-top: 14px; color: var(--text-secondary); font-size: 14px; }
 summary { cursor: pointer; }
 table { border-collapse: collapse; margin-top: 8px; font-size: 13px; font-variant-numeric: tabular-nums; }
-td, th { padding: 3px 12px 3px 0; text-align: left; border-bottom: 1px solid var(--grid); }
+td, th { padding: 4px 14px 4px 0; text-align: left; border-bottom: 1px solid var(--border); }
 
-/* authority */
+/* lists and grids */
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 @media (max-width: 720px) { .two { grid-template-columns: 1fr; } }
-.two ul { margin: 8px 0 0; padding-left: 18px; color: var(--text-secondary); }
-.two li { margin: 4px 0; }
-.two h3 { margin: 0; font-size: 16px; }
-.guards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+.two ul { margin: 12px 0 0; padding: 0; list-style: none; color: var(--text-secondary); }
+.two li { margin: 9px 0; padding-left: 18px; position: relative; }
+.two li::before { content: ""; position: absolute; left: 0; top: .62em; width: 6px; height: 6px; border-radius: 1px; background: var(--teal-light); }
+.two li b { color: var(--text-primary); font-weight: 600; }
+.guards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+.guard { transition: border-color .15s, transform .15s; }
+.guard:hover { border-color: var(--hover-edge); transform: translateY(-2px); }
 .guard .t { font-weight: 600; }
-.guard p { margin: 4px 0 0; color: var(--text-secondary); font-size: 14px; }
-footer { margin-top: 72px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--grid); padding-top: 18px; }
+.guard p { margin: 6px 0 0; color: var(--text-secondary); font-size: 14px; }
+code { font-family: inherit; font-size: .95em; background: var(--surface); border: 1px solid var(--border); border-radius: 3px; padding: 0 5px; color: var(--text-primary); }
+footer { margin-top: 96px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); padding-top: 20px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 </style>
 </head>
 <body>
 <div class="viz-root">
 <div class="wrap">
 
-<button class="theme-btn" id="theme" type="button">Light mode</button>
-<div class="eyebrow">Ben Coons · The Bonus Stack</div>
-<h1>An AI CEO runs my business<br>every morning at 3:03.</h1>
-<p class="lede">The Bonus Stack is a bank-bonus site. Every morning a scheduled AI CEO sends out about ten AI agents to find new offers, check every live offer, write and publish pages and read the numbers. Then it ships the site and emails me a report. I steer it with GitHub issues. Everything below comes from the run log it keeps.</p>
+<header class="bar">
+  <div class="me">Ben Coons</div>
+  <div class="right">
+    <a href="https://thebonusstack.com" target="_blank" rel="noopener">thebonusstack.com ↗</a>
+    <button class="icon-btn" id="theme" type="button" aria-label="Switch theme"></button>
+  </div>
+</header>
 
-<div class="tiles" id="tiles"></div>
+<div class="hero">
+  <span class="brand"><img src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='4 4 56 56'%3E%3Cpath d='M8 8H40L48 16V20H8Z' fill='%232EC4B6'/%3E%3Crect x='12' y='24' width='40' height='12' rx='1' fill='%23F4845F'/%3E%3Crect x='16' y='40' width='40' height='12' rx='1' fill='%23A87FD6'/%3E%3C/svg%3E" alt="">The Bonus Stack</span>
+  <h1>An AI CEO runs my business <em>every morning at 3:03.</em></h1>
+  <p class="lede">The Bonus Stack is a bank-bonus site. Every morning a scheduled AI CEO sends out about ten AI agents to find new offers, check every live offer, write and publish pages and read the numbers. Then it ships the site and emails me a report. I steer it with GitHub issues. Everything below comes from the run log it keeps.</p>
+  <div class="ctas">
+    <a class="btn primary" href="#how">See how a morning works</a>
+    <a class="btn secondary" href="https://thebonusstack.com" target="_blank" rel="noopener">Visit the site ↗</a>
+  </div>
+</div>
 
-<section>
+<div class="strip" id="tiles"></div>
+
+<main>
+<section id="how">
+  <span class="kicker">How it works</span>
   <h2>How a morning works</h2>
-  <p class="sub">Click any box to see what it does. Blue boxes can publish and change the site. Orange boxes only read data.</p>
+  <p class="sub">Open any step to see what it does. Teal steps can publish and change the site. Orange steps only read data.</p>
   <div class="card">
+    <div class="flow-head">
+      <div class="legend"><span><span class="swatch" style="background:var(--pub)"></span>Publishing chain</span><span><span class="swatch" style="background:var(--intel)"></span>Intel chain</span></div>
+      <button class="link-btn" id="expand" type="button">Open all steps</button>
+    </div>
     <div class="flow">
-      <div class="row split">
-        <button class="node" data-k="timer"><div class="t">03:03 · Timer fires</div><div class="d">systemd on a home server</div></button>
-        <button class="node" data-k="guard"><div class="t">Guard admits the run</div><div class="d">lease, watchdog, memory cap</div></button>
-        <button class="node" data-k="intake"><div class="t">Intake</div><div class="d">inbox, issues, my answers, health sweep</div></button>
+      <div class="row3">
+        <details class="node" data-k="timer"><summary><div class="t">03:03 · Timer fires</div><div class="d">systemd on a home server</div></summary></details>
+        <details class="node" data-k="guard"><summary><div class="t">Guard admits the run</div><div class="d">lease, watchdog, memory cap</div></summary></details>
+        <details class="node" data-k="intake"><summary><div class="t">Intake</div><div class="d">inbox, issues, my answers, health sweep</div></summary></details>
       </div>
       <div class="arrow"></div>
-      <button class="node ceo" data-k="ceo"><div class="t">CEO agent</div><div class="d">Dispatches every loop and checks each result. It does no loop work itself.</div><div class="who">Claude Opus 5.5</div></button>
+      <details class="node ceo" data-k="ceo"><summary><div class="t">CEO agent</div><div class="d">Dispatches every loop and checks each result. It does no loop work itself.</div><span class="who">Claude Opus 5.5</span></summary></details>
       <div class="arrow"></div>
-      <button class="node" data-k="email"><div class="t">Email loop · runs alone, first</div><div class="d">triages the business inbox; its receipts feed the finance loop</div></button>
+      <details class="node" data-k="email"><summary><div class="t">Email loop · runs alone, first</div><div class="d">triages the business inbox; its receipts feed the finance loop</div></summary></details>
       <div class="arrow"></div>
       <div class="lanes">
         <div class="lane">
           <h3><span class="swatch" style="background:var(--pub)"></span>Publishing chain <small>owns git and the browser, one loop at a time</small></h3>
-          <div class="chain">
-            <button class="node pub" data-k="content"><div class="t">Content</div><div class="d">analytics, page accuracy, SEO fixes</div></button><div class="link"></div>
-            <button class="node pub" data-k="dp"><div class="t">Data points</div><div class="d">scrapes and judges reader reports</div></button><div class="link"></div>
-            <button class="node pub" data-k="deep"><div class="t">Deep discovery</div><div class="d">hunts banks nobody covers yet</div></button><div class="link"></div>
-            <button class="node pub" data-k="offer"><div class="t">Offer accuracy</div><div class="d">re-verifies live offers on bank pages</div></button><div class="link"></div>
-            <button class="node pub" data-k="social"><div class="t">Social</div><div class="d">stages posts for approved offers</div></button><div class="link"></div>
-            <button class="node pub" data-k="ship"><div class="t">Ship · CEO</div><div class="d">one push, verify deploy and CI, ping search engines</div></button><div class="link"></div>
-            <button class="node pub dim" data-k="weekly"><div class="t">Weekly add-ons</div><div class="d">Mon site integrity · Wed growth · Fri subscriber digest</div></button>
-          </div>
+          <details class="node pub" data-k="content"><summary><div class="t">Content</div><div class="d">analytics, page accuracy, SEO fixes</div></summary></details><div class="link"></div>
+          <details class="node pub" data-k="dp"><summary><div class="t">Data points</div><div class="d">scrapes and judges reader reports</div></summary></details><div class="link"></div>
+          <details class="node pub" data-k="deep"><summary><div class="t">Deep discovery</div><div class="d">hunts banks nobody covers yet</div></summary></details><div class="link"></div>
+          <details class="node pub" data-k="offer"><summary><div class="t">Offer accuracy</div><div class="d">re-verifies live offers on bank pages</div></summary></details><div class="link"></div>
+          <details class="node pub" data-k="social"><summary><div class="t">Social</div><div class="d">stages posts for approved offers</div></summary></details><div class="link"></div>
+          <details class="node pub" data-k="ship"><summary><div class="t">Ship · CEO</div><div class="d">one push, verify deploy and CI, ping search engines</div></summary></details><div class="link"></div>
+          <details class="node pub dim" data-k="weekly"><summary><div class="t">Weekly add-ons</div><div class="d">Mon site integrity · Wed growth · Fri subscriber digest</div></summary></details>
         </div>
         <div class="lane">
-          <h3><span class="swatch" style="background:var(--intel)"></span>Intel chain <small>read-only, runs in parallel</small></h3>
-          <div class="chain">
-            <button class="node intel" data-k="finance"><div class="t">Finance</div><div class="d">books receipts; runs only when due</div></button><div class="link"></div>
-            <button class="node intel" data-k="conversion"><div class="t">Conversion</div><div class="d">which offers readers click</div></button><div class="link"></div>
-            <button class="node intel" data-k="tracker"><div class="t">Tracker</div><div class="d">how people use the bonus tracker</div></button>
-          </div>
+          <h3><span class="swatch" style="background:var(--intel)"></span>Intel chain <small>read-only, in parallel</small></h3>
+          <details class="node intel" data-k="finance"><summary><div class="t">Finance</div><div class="d">books receipts; runs only when due</div></summary></details><div class="link"></div>
+          <details class="node intel" data-k="conversion"><summary><div class="t">Conversion</div><div class="d">which offers readers click</div></summary></details><div class="link"></div>
+          <details class="node intel" data-k="tracker"><summary><div class="t">Tracker</div><div class="d">how people use the bonus tracker</div></summary></details>
         </div>
       </div>
       <div class="arrow"></div>
-      <div class="row split">
-        <button class="node" data-k="monthly"><div class="t">Monthlies</div><div class="d">competitors, ops audit, brand review</div></button>
-        <button class="node ceo" data-k="synth"><div class="t">CEO synthesis</div><div class="d">decides, files issues, starts build work</div></button>
-        <button class="node" data-k="close"><div class="t">Close gate → report</div><div class="d">no loop due today can go missing</div></button>
+      <div class="row3">
+        <details class="node" data-k="monthly"><summary><div class="t">Monthlies</div><div class="d">competitors, ops audit, brand review</div></summary></details>
+        <details class="node ceo" data-k="synth"><summary><div class="t">CEO synthesis</div><div class="d">decides, files issues, starts build work</div></summary></details>
+        <details class="node" data-k="close"><summary><div class="t">Close gate → report</div><div class="d">no loop due today can go missing</div></summary></details>
       </div>
     </div>
-    <div class="detail" id="detail" aria-live="polite"><div class="hint">Click a box ↑</div></div>
   </div>
 </section>
 
 <section>
+  <span class="kicker">The team</span>
   <h2>One person, a team's worth of work</h2>
   <p class="sub">Each loop does a job I would otherwise do myself or hire for. My job is to decide what the business needs, write the rules and fix whatever breaks.</p>
   <div class="guards">
@@ -184,6 +248,7 @@ footer { margin-top: 72px; color: var(--muted); font-size: 13px; border-top: 1px
 </section>
 
 <section>
+  <span class="kicker">Today's run</span>
   <h2>This morning, minute by minute</h2>
   <p class="sub">Friday, Oct 23, 2026. The full run took 101 minutes, from 03:03 to 04:44, with no human involved. Finance had nothing due, so its gate skipped it.</p>
   <div class="card">
@@ -194,6 +259,7 @@ footer { margin-top: 72px; color: var(--muted); font-size: 13px; border-top: 1px
 </section>
 
 <section>
+  <span class="kicker">Track record</span>
   <h2>Every morning since July 22</h2>
   <p class="sub" id="histSub"></p>
   <div class="card">
@@ -204,6 +270,7 @@ footer { margin-top: 72px; color: var(--muted); font-size: 13px; border-top: 1px
 </section>
 
 <section>
+  <span class="kicker">Agent-ready</span>
   <h2>Built for agents to read</h2>
   <p class="sub">More and more, people will find, compare and buy things through AI agents instead of a browser. I build the site for those agents as much as for people, and they're already reading it.</p>
   <div class="card">
@@ -229,6 +296,7 @@ footer { margin-top: 72px; color: var(--muted); font-size: 13px; border-top: 1px
 </section>
 
 <section>
+  <span class="kicker">Authority</span>
   <h2>Who decides what</h2>
   <p class="sub">The CEO acts on its own wherever the evidence points to one clear option. A short list of decisions always comes to me.</p>
   <div class="two">
@@ -249,6 +317,7 @@ footer { margin-top: 72px; color: var(--muted); font-size: 13px; border-top: 1px
 </section>
 
 <section>
+  <span class="kicker">Guardrails</span>
   <h2>What keeps it honest</h2>
   <p class="sub">Most of the work is making agents fail loudly instead of quietly. A clean exit is not a success, and a process being alive is not progress.</p>
   <div class="guards">
@@ -262,6 +331,7 @@ footer { margin-top: 72px; color: var(--muted); font-size: 13px; border-top: 1px
 </section>
 
 <section>
+  <span class="kicker">Beyond the business</span>
   <h2>The same system runs the rest of my life</h2>
   <p class="sub">The business is one project on a home server I built for all of it. One chat from my phone reaches every project, and all the agents share one memory.</p>
   <div class="guards">
@@ -273,6 +343,7 @@ footer { margin-top: 72px; color: var(--muted); font-size: 13px; border-top: 1px
 </section>
 
 <section>
+  <span class="kicker">What's next</span>
   <h2>Next: a workforce that works in shifts</h2>
   <p class="sub">The plan is to grow the morning run into a workforce. Specialist workers will run in shifts through the day, and each one will be able to pull anything the business knows the moment it needs it.</p>
   <div class="two">
@@ -291,7 +362,9 @@ footer { margin-top: 72px; color: var(--muted); font-size: 13px; border-top: 1px
   </div>
 </section>
 
-<footer>Built and run by Ben Coons. Data comes from the business's own run log through Oct 23, 2026. Money figures are left out on purpose.</footer>
+</main>
+
+<footer><span>Built and run by Ben Coons.</span><span>Data from the business's own run log through Oct 23, 2026. Money figures left out on purpose.</span></footer>
 </div>
 <div id="tip"></div>
 </div>
@@ -299,14 +372,19 @@ footer { margin-top: 72px; color: var(--muted); font-size: 13px; border-top: 1px
 <script>
 const DATA = {"runs": [{"d": "2026-07-22", "s": "ok", "m": 76, "dep": false, "n": 9, "ok": 9}, {"d": "2026-07-23", "s": "ok", "m": 88, "dep": false, "n": 8, "ok": 8}, {"d": "2026-07-24", "s": "ok", "m": 106, "dep": false, "n": 9, "ok": 9}, {"d": "2026-07-25", "s": "ok", "m": 107, "dep": false, "n": 8, "ok": 8}, {"d": "2026-07-26", "s": "ok", "m": 113, "dep": false, "n": 8, "ok": 8}, {"d": "2026-07-27", "s": "ok", "m": 171, "dep": false, "n": 9, "ok": 9}, {"d": "2026-07-28", "s": "ok", "m": 201, "dep": false, "n": 8, "ok": 8}, {"d": "2026-07-29", "s": "ok", "m": 170, "dep": false, "n": 8, "ok": 8}, {"d": "2026-07-30", "s": "ok", "m": 205, "dep": false, "n": 8, "ok": 8}, {"d": "2026-07-31", "s": "ok", "m": 168, "dep": false, "n": 9, "ok": 9}, {"d": "2026-08-01", "s": "ok", "m": 196, "dep": false, "n": 10, "ok": 10}, {"d": "2026-08-02", "s": "ok", "m": 161, "dep": false, "n": 9, "ok": 9}, {"d": "2026-08-03", "s": "ok", "m": 185, "dep": false, "n": 9, "ok": 9}, {"d": "2026-08-04", "s": "ok", "m": 158, "dep": false, "n": 8, "ok": 8}, {"d": "2026-08-05", "s": "ok", "m": 193, "dep": false, "n": 8, "ok": 8}, {"d": "2026-08-06", "s": "ok", "m": 120, "dep": false, "n": 8, "ok": 8}, {"d": "2026-08-07", "s": "partial", "m": 188, "dep": false, "n": 9, "ok": 8}, {"d": "2026-08-08", "s": "partial", "m": 135, "dep": false, "n": 8, "ok": 7}, {"d": "2026-08-10", "s": "ok", "m": 210, "dep": false, "n": 9, "ok": 9}, {"d": "2026-08-11", "s": "ok", "m": 127, "dep": false, "n": 8, "ok": 8}, {"d": "2026-08-13", "s": "ok", "m": 196, "dep": false, "n": 8, "ok": 8}, {"d": "2026-08-14", "s": "ok", "m": 80, "dep": false, "n": 9, "ok": 9}, {"d": "2026-08-15", "s": "ok", "m": 66, "dep": false, "n": 9, "ok": 8}, {"d": "2026-08-16", "s": "ok", "m": 80, "dep": false, "n": 8, "ok": 7}, {"d": "2026-08-17", "s": "partial", "m": null, "dep": false, "n": 9, "ok": 9}, {"d": "2026-08-18", "s": "ok", "m": 62, "dep": true, "n": 8, "ok": 8}, {"d": "2026-08-19", "s": "ok", "m": 62, "dep": true, "n": 8, "ok": 8}, {"d": "2026-08-20", "s": "ok", "m": 67, "dep": false, "n": 8, "ok": 8}, {"d": "2026-08-21", "s": "ok", "m": 67, "dep": false, "n": 9, "ok": 9}, {"d": "2026-08-22", "s": "ok", "m": 77, "dep": true, "n": 9, "ok": 9}, {"d": "2026-08-23", "s": "ok", "m": 59, "dep": true, "n": 8, "ok": 8}, {"d": "2026-08-24", "s": "partial", "m": 162, "dep": true, "n": 9, "ok": 8}, {"d": "2026-08-25", "s": "ok", "m": 92, "dep": true, "n": 8, "ok": 8}, {"d": "2026-08-26", "s": "ok", "m": 98, "dep": true, "n": 8, "ok": 7}, {"d": "2026-08-27", "s": "ok", "m": 62, "dep": true, "n": 8, "ok": 8}, {"d": "2026-08-28", "s": "ok", "m": 67, "dep": true, "n": 9, "ok": 8}, {"d": "2026-08-29", "s": "ok", "m": 67, "dep": true, "n": 8, "ok": 7}, {"d": "2026-08-30", "s": "ok", "m": 60, "dep": true, "n": 8, "ok": 7}, {"d": "2026-08-31", "s": "ok", "m": 112, "dep": true, "n": 9, "ok": 8}, {"d": "2026-09-01", "s": "ok", "m": 91, "dep": true, "n": 10, "ok": 10}, {"d": "2026-09-02", "s": "ok", "m": 87, "dep": true, "n": 8, "ok": 7}, {"d": "2026-09-03", "s": "ok", "m": 76, "dep": true, "n": 8, "ok": 7}, {"d": "2026-09-04", "s": "ok", "m": 92, "dep": true, "n": 9, "ok": 9}, {"d": "2026-09-05", "s": "ok", "m": 109, "dep": true, "n": 8, "ok": 7}, {"d": "2026-09-06", "s": "partial", "m": 97, "dep": true, "n": 8, "ok": 6}, {"d": "2026-09-07", "s": "partial", "m": 112, "dep": true, "n": 9, "ok": 8}, {"d": "2026-09-08", "s": "partial", "m": 100, "dep": true, "n": 8, "ok": 7}, {"d": "2026-09-09", "s": "ok", "m": 97, "dep": true, "n": 8, "ok": 8}, {"d": "2026-09-10", "s": "ok", "m": 109, "dep": true, "n": 8, "ok": 7}, {"d": "2026-09-12", "s": "ok", "m": 102, "dep": true, "n": 8, "ok": 7}, {"d": "2026-09-13", "s": "ok", "m": 97, "dep": true, "n": 8, "ok": 7}, {"d": "2026-09-14", "s": "partial", "m": 417, "dep": true, "n": 9, "ok": 9}, {"d": "2026-09-15", "s": "ok", "m": 112, "dep": true, "n": 9, "ok": 9}, {"d": "2026-09-16", "s": "ok", "m": 101, "dep": true, "n": 8, "ok": 8}, {"d": "2026-09-17", "s": "ok", "m": 86, "dep": true, "n": 8, "ok": 8}, {"d": "2026-09-18", "s": "ok", "m": 96, "dep": true, "n": 9, "ok": 9}, {"d": "2026-09-19", "s": "ok", "m": 110, "dep": true, "n": 8, "ok": 7}, {"d": "2026-09-20", "s": "ok", "m": 98, "dep": true, "n": 8, "ok": 7}, {"d": "2026-09-21", "s": "ok", "m": 101, "dep": true, "n": 9, "ok": 9}, {"d": "2026-09-22", "s": "ok", "m": 112, "dep": true, "n": 9, "ok": 9}, {"d": "2026-09-23", "s": "ok", "m": 108, "dep": true, "n": 8, "ok": 8}, {"d": "2026-09-24", "s": "ok", "m": 99, "dep": true, "n": 8, "ok": 8}, {"d": "2026-09-25", "s": "ok", "m": 63, "dep": true, "n": 9, "ok": 9}, {"d": "2026-09-26", "s": "ok", "m": 68, "dep": true, "n": 8, "ok": 8}, {"d": "2026-09-27", "s": "ok", "m": 77, "dep": true, "n": 8, "ok": 8}, {"d": "2026-09-28", "s": "ok", "m": 98, "dep": true, "n": 9, "ok": 8}, {"d": "2026-09-29", "s": "ok", "m": 69, "dep": true, "n": 8, "ok": 7}, {"d": "2026-09-30", "s": "ok", "m": 59, "dep": true, "n": 8, "ok": 7}, {"d": "2026-10-01", "s": "ok", "m": 65, "dep": true, "n": 10, "ok": 9}, {"d": "2026-10-02", "s": "ok", "m": 57, "dep": true, "n": 9, "ok": 9}, {"d": "2026-10-03", "s": "ok", "m": 52, "dep": true, "n": 8, "ok": 8}, {"d": "2026-10-04", "s": "ok", "m": 72, "dep": true, "n": 8, "ok": 7}, {"d": "2026-10-05", "s": "ok", "m": 94, "dep": true, "n": 9, "ok": 9}, {"d": "2026-10-06", "s": "partial", "m": 72, "dep": true, "n": 8, "ok": 6}, {"d": "2026-10-07", "s": "ok", "m": 65, "dep": true, "n": 9, "ok": 9}, {"d": "2026-10-08", "s": "ok", "m": 67, "dep": true, "n": 8, "ok": 7}, {"d": "2026-10-09", "s": "ok", "m": 88, "dep": true, "n": 9, "ok": 8}, {"d": "2026-10-10", "s": "ok", "m": 87, "dep": true, "n": 8, "ok": 7}, {"d": "2026-10-11", "s": "ok", "m": 76, "dep": true, "n": 8, "ok": 7}, {"d": "2026-10-12", "s": "ok", "m": 129, "dep": true, "n": 9, "ok": 9}, {"d": "2026-10-13", "s": "ok", "m": 72, "dep": true, "n": 8, "ok": 7}, {"d": "2026-10-14", "s": "ok", "m": 82, "dep": true, "n": 9, "ok": 8}, {"d": "2026-10-15", "s": "ok", "m": 102, "dep": true, "n": 9, "ok": 8}, {"d": "2026-10-16", "s": "ok", "m": 92, "dep": true, "n": 9, "ok": 9}, {"d": "2026-10-17", "s": "ok", "m": 97, "dep": true, "n": 8, "ok": 7}, {"d": "2026-10-18", "s": "ok", "m": 78, "dep": true, "n": 8, "ok": 7}, {"d": "2026-10-19", "s": "partial", "m": 112, "dep": true, "n": 9, "ok": 8}, {"d": "2026-10-20", "s": "ok", "m": 97, "dep": true, "n": 8, "ok": 7}, {"d": "2026-10-21", "s": "ok", "m": 89, "dep": true, "n": 9, "ok": 8}, {"d": "2026-10-22", "s": "ok", "m": 197, "dep": true, "n": 10, "ok": 9}, {"d": "2026-10-23", "s": "ok", "m": 101, "dep": true, "n": 10, "ok": 9}], "today": [{"l": "email", "s": "ok", "a": "03:05", "b": "03:10"}, {"l": "finance", "s": "nothing-to-do", "a": "03:10", "b": "03:10"}, {"l": "conversion", "s": "ok", "a": "03:11", "b": "03:17"}, {"l": "tracker", "s": "ok", "a": "03:17", "b": "03:21"}, {"l": "content", "s": "ok", "a": "03:11", "b": "03:20"}, {"l": "dp", "s": "ok", "a": "03:23", "b": "03:35"}, {"l": "deep-discovery", "s": "ok", "a": "03:38", "b": "03:46"}, {"l": "offer", "s": "ok", "a": "03:48", "b": "04:08"}, {"l": "social", "s": "ok", "a": "04:10", "b": "04:20"}, {"l": "digest", "s": "ok", "a": "04:31", "b": "04:40"}], "ai": [{"w": "2026-03-09", "c": 17}, {"w": "2026-03-16", "c": 146}, {"w": "2026-03-23", "c": 263}, {"w": "2026-03-30", "c": 184}, {"w": "2026-04-06", "c": 407}, {"w": "2026-04-13", "c": 468}, {"w": "2026-04-20", "c": 997}, {"w": "2026-04-27", "c": 1243}, {"w": "2026-05-04", "c": 1938}, {"w": "2026-05-11", "c": 2372}, {"w": "2026-05-18", "c": 2634}, {"w": "2026-05-25", "c": 2353}, {"w": "2026-06-01", "c": 2975}, {"w": "2026-06-08", "c": 3348}, {"w": "2026-06-15", "c": 3301}, {"w": "2026-06-22", "c": 3907}, {"w": "2026-06-29", "c": 3670}, {"w": "2026-07-06", "c": 5305}, {"w": "2026-07-13", "c": 6188}, {"w": "2026-07-20", "c": 5075}, {"w": "2026-07-27", "c": 3504}, {"w": "2026-08-03", "c": 5209}, {"w": "2026-08-10", "c": 7783}, {"w": "2026-08-17", "c": 5576}, {"w": "2026-08-24", "c": 6905}, {"w": "2026-08-31", "c": 8308}, {"w": "2026-09-07", "c": 9573}, {"w": "2026-09-14", "c": 11279}, {"w": "2026-09-21", "c": 10675}, {"w": "2026-09-28", "c": 10355}, {"w": "2026-10-05", "c": 8969}, {"w": "2026-10-12", "c": 9533}], "aiTotal": 146058, "aiThrough": "2026-10-19"};
 const $ = s => document.querySelector(s);
-const css = v => getComputedStyle($('.viz-root')).getPropertyValue(v).trim();
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const NS = 'http://www.w3.org/2000/svg';
 const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
 
 /* theme */
+const SUN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+const MOON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+const setIcon = () => { $('#theme').innerHTML = document.documentElement.dataset.theme === 'dark' ? SUN : MOON; };
+setIcon();
 $('#theme').onclick = () => {
-  const r = document.documentElement; const dark = r.dataset.theme === 'dark';
-  r.dataset.theme = dark ? 'light' : 'dark'; $('#theme').textContent = dark ? 'Dark mode' : 'Light mode'; drawAll();
+  const r = document.documentElement; r.dataset.theme = r.dataset.theme === 'dark' ? 'light' : 'dark';
+  try { localStorage.setItem('theme', r.dataset.theme); } catch (e) {}
+  setIcon(); drawAll();
 };
 
 /* tooltip */
@@ -358,12 +436,9 @@ const INFO = {
   synth: ['CEO synthesis', 'Decides open questions that have a clear answer, files work as GitHub issues and dispatches build lanes. Opus implements, Sonnet builds and GPT-6.1 reviews the PR.'],
   close: ['Close gate → report', 'A deterministic script checks that every loop due today has a record. Then the CEO emails me a digest: what it did, what it decided and what needs me.'],
 };
-document.querySelectorAll('.node').forEach(n => n.addEventListener('click', () => {
-  document.querySelectorAll('.node.active').forEach(a => a.classList.remove('active')); n.classList.add('active');
-  const [t, p] = INFO[n.dataset.k]; const d = $('#detail'); d.replaceChildren();
-  const a = document.createElement('div'); a.className = 't'; a.textContent = t; const b = document.createElement('p'); b.textContent = p; d.append(a, b);
-  if (innerWidth < 720) d.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-}));
+document.querySelectorAll('details.node').forEach(n => { const p = document.createElement('p'); p.className = 'more'; p.textContent = INFO[n.dataset.k][1]; n.append(p); });
+$('#expand').onclick = () => { const all = [...document.querySelectorAll('details.node')]; const open = !all.every(n => n.open);
+  all.forEach(n => n.open = open); $('#expand').textContent = open ? 'Close all steps' : 'Open all steps'; };
 
 /* gantt */
 const LANE = { email: 'neutral', finance: 'intel', conversion: 'intel', tracker: 'intel', content: 'pub', dp: 'pub', 'deep-discovery': 'pub', offer: 'pub', social: 'pub', digest: 'pub' };
@@ -394,7 +469,7 @@ function drawGantt() {
       const s = el('text', { x: x(a) + 12, y: y + rowH / 2 + 4, class: 'axis-label' }, svg); s.textContent = 'gate: not due, skipped';
     } else {
       mark = el('rect', { x: x(a), y: y + 6, width: Math.max(4, x(b) - x(a)), height: rowH - 12, rx: 4, fill: col[r.lane], opacity: r.l === 'CEO run' ? 0.35 : 1 }, svg);
-      if (x(b) - x(a) > 34) { const s = el('text', { x: x(a) + 7, y: y + rowH / 2 + 4, fill: '#fff', 'font-size': 11, 'pointer-events': 'none' }, svg); s.textContent = dur + 'm'; }
+      if (x(b) - x(a) > 34) { const s = el('text', { x: x(a) + 7, y: y + rowH / 2 + 4, fill: css('--on-series'), 'font-size': 11, 'font-weight': 600, 'pointer-events': 'none' }, svg); s.textContent = dur + 'm'; }
     }
     hover(mark, `${r.a}–${r.b} · ${dur} min`, `${r.l}${r.s !== 'ok' ? ' · ' + r.s : ''}${r.note ? ' · ' + r.note : ''}`);
     const tr = tb.insertRow(); [r.l, r.a, r.b, dur, r.s].forEach(v => { tr.insertCell().textContent = v; });
